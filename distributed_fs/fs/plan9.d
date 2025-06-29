@@ -5,20 +5,25 @@ import distributed_fs.fs.node;
 /// Plan9-like filesystem tree
 class Plan9FS {
     DirNode root;
-    DirNode users;
-    DirNode hardware;
+    DirNode home;
 
-    this() {
+    this(DirNode srvMount = null) {
         root = new DirNode("/");
-        // /dev, /proc placeholders
+        root.add(new DirNode("bin"));
+        root.add(new DirNode("etc"));
+        root.add(new DirNode("usr"));
+        root.add(new DirNode("lib"));
+        root.add(new DirNode("sbin"));
+        root.add(new DirNode("var"));
+        root.add(new DirNode("tmp"));
         root.add(new DirNode("dev"));
         root.add(new DirNode("proc"));
-        // /users for per-user directories
-        users = new DirNode("users");
-        root.add(users);
-        // /hardware abstraction directory
-        hardware = new DirNode("hardware");
-        root.add(hardware);
+        home = new DirNode("home");
+        root.add(home);
+        auto srv = new DirNode("srv");
+        if(srvMount !is null)
+            srv.add(srvMount);
+        root.add(srv);
     }
 
     /// create user directory with session customizations
@@ -26,13 +31,13 @@ class Plan9FS {
         auto udir = new DirNode(name);
         udir.add(new DirNode("env"));
         udir.add(new DirNode("sessions"));
-        users.add(udir);
+        home.add(udir);
         return udir;
     }
 
-    /// add generic hardware subfolder
-    void addHardware(string name) {
-        hardware.add(new DirNode(name));
+    /// expose root directory
+    DirNode rootDir() {
+        return root;
     }
 }
 
